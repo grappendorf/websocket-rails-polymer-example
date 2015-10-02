@@ -88,7 +88,7 @@
     t.incomingMessage = function(e) {
       t.push('messages', e.detail);
       t.async(function() {
-        t.$.messages.scrollToIndex(t.messages.length - 2);
+        t.$.messages.scrollToIndex(t.messages.length - 1);
       });
     };
     t.publishMessage = function() {
