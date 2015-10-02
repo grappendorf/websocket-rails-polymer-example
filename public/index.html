@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>websocket-rails-example</title>
+  <script src='assets/webcomponentsjs/webcomponents-lite.min.js'></script>
+  <link rel="import" href="assets/iron-icons/iron-icons.html">
+  <link rel="import" href="assets/iron-list/iron-list.html">
+  <link rel="import" href="assets/paper-fab/paper-fab.html" rel="import">
+  <link rel="import" href="assets/paper-input/paper-input.html" rel="import">
+  <link rel="import" href="assets/paper-material/paper-material.html" rel="import">
+  <link rel="import" href="assets/grapp-websocket-rails/grapp-websocket-rails.html">
+
+  <style>
+    #content {
+      width: 50%;
+      margin: 32px auto;
+    }
+
+    iron-list {
+      height: 40em;
+    }
+
+    paper-fab {
+      margin-top: 2em;
+    }
+
+    paper-input {
+      width: 100%;
+    }
+
+    #text {
+      margin-top: 2em;
+    }
+  </style>
+</head>
+
+<body class="fullbleed unresolved">
+
+  <template id="app" is="dom-bind">
+
+    <grapp-websocket-rails url="ws://127.0.0.1:3000/websocket" websocket="{{websocket}}">
+    </grapp-websocket-rails>
+
+    <grapp-websocket-rails-subscribe channel="chat" websocket="[[websocket]]">
+      <grapp-websocket-rails-bind event="joined" on-data="userJoined"></grapp-websocket-rails-bind>
+      <grapp-websocket-rails-bind event="message" on-data="incomingMessage"></grapp-websocket-rails-bind>
+    </grapp-websocket-rails-subscribe>
+
+    <div id="content">
+      <div class="layout vertical" hidden$="[[connected]]">
+        <paper-input label="Enter your user name and join the chat" autofocus
+                     value="{{user}}" on-change="connect"></paper-input>
+        <paper-fab icon="forward" class="self-end" disabled="[[!user]]"
+                   on-tap="connect"></paper-fab>
+      </div>
+
+      <div class="layout vertical" hidden$="[[!connected]]">
+        <paper-material>
+          <iron-list id="messages" items="[[messages]]" as="message" class="flex">
+            <template>
+              <div>
+                <b>[[message.user]]</b>:&nbsp;<span>[[message.text]]</span>
+              </div>
+            </template>
+          </iron-list>
+        </paper-material>
+        <paper-input id="text" label="Type your message and hit enter..." no-label-float
+                     value="{{text}}" on-change="publishMessage"></paper-input>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    var t = document.querySelector('#app');
+    t.connected = false;
+    t.messages = [{user: 'system', text: 'Welcome to the websocket-rails-example chat!'}];
+    t.connect = function() {
+      t.websocket.trigger('join', {user: t.user});
+    };
+    t.userJoined = function(e) {
+      if (t.user === e.detail.user) {
+        t.connected = true;
+        t.$.text.$$('input').focus();
+      }
+    };
+    t.incomingMessage = function(e) {
+      t.push('messages', e.detail);
+      t.async(function() {
+        t.$.messages.scrollToIndex(t.messages.length - 2);
+      });
+    };
+    t.publishMessage = function() {
+      t.websocket.trigger('publish', {user: t.user, text: t.text});
+      t.text = '';
+    }
+  </script>
+</body>
+
+</html>
