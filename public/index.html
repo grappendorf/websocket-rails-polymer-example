@@ -73,27 +73,27 @@
   </template>
 
   <script>
-    var t = document.querySelector('#app');
-    t.connected = false;
-    t.messages = [{user: 'system', text: 'Welcome to the websocket-rails-example chat!'}];
-    t.connect = function() {
-      t.websocket.trigger('join', {user: t.user});
+    var app = document.querySelector('#app');
+    app.connected = false;
+    app.messages = [{user: 'system', text: 'Welcome to the websocket-rails-example chat!'}];
+    app.connect = function() {
+      app.websocket.trigger('join', {user: app.user});
     };
-    t.userJoined = function(e) {
-      if (t.user === e.detail.user) {
-        t.connected = true;
-        t.$.text.$$('input').focus();
+    app.userJoined = function(e) {
+      if (app.user === e.detail.user) {
+        app.connected = true;
+        app.$.text.$$('input').focus();
       }
     };
-    t.incomingMessage = function(e) {
-      t.push('messages', e.detail);
-      t.async(function() {
-        t.$.messages.scrollToIndex(t.messages.length - 1);
+    app.incomingMessage = function(e) {
+      app.push('messages', e.detail);
+      app.async(function() {
+        app.$.messages.scrollToIndex(app.messages.length - 1);
       });
     };
-    t.publishMessage = function() {
-      t.websocket.trigger('publish', {user: t.user, text: t.text});
-      t.text = '';
+    app.publishMessage = function() {
+      app.websocket.trigger('publish', {user: app.user, text: app.text});
+      app.text = '';
     }
   </script>
 </body>
